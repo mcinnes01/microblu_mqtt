@@ -164,7 +164,8 @@ void setPinModeCallback(byte pin, int mode)
     }
     break;
   default:
-    Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
+  ;
+    //Firmata.sendString("Unknown pin mode"); // TODO: put error msgs in EEPROM
   }
   // TODO: save status to EEPROM here, if changed
 }
@@ -362,13 +363,10 @@ void systemResetCallback()
 
 //we'll run this if anyone messages us
 void onMessage(char* topic, byte* payload, unsigned int length) {
-
  // handle incoming messages, well just print it for now
- Serial.println(topic);
  for(int i =0; i<length; i++){
-   Serial.print((char)payload[i]);
- }    
- Serial.println();
+   (char)payload[i];
+ } 
 
  b64::decode((char*)payload, length, externalaccess);
 
@@ -377,15 +375,11 @@ void onMessage(char* topic, byte* payload, unsigned int length) {
 
 void setup()
 {
-
-  Serial.begin(9600);
-
   // start the Ethernet connection:
-  if (Ethernet.begin(mac) == 0) {
-    Serial.println(F("Failed to configure Ethernet using DHCP"));
+  //if (Ethernet.begin(mac) == 0) {
     // try to congifure using IP address instead of DHCP:
     Ethernet.begin(mac, ip);
-  }
+  //}
   
   Firmata.setFirmwareVersion(FIRMATA_MAJOR_VERSION, FIRMATA_MINOR_VERSION);
 
@@ -454,18 +448,12 @@ void loop()
     while(externalaccess.available())
       externalaccess.read();
       
-    //oops we're not connected yet or we lost connection
-    Serial.println(F("connecting..."));
-      
     String clientIdStr = "microblu_" + String(random(500000)) + "_" + String(random(500000));
     int clientId_len = clientIdStr.length() + 1;
     char clientId[clientId_len];
     clientIdStr.toCharArray(clientId, clientId_len);    
 
     if (microblu.connect(clientId, UUID, TOKEN)){
-
-      //success!
-      Serial.println(F("connected"));
 
       //you need to subscribe to your uuid to get messages for you
       microblu.subscribe(UUID);
