@@ -22,7 +22,6 @@
 #include <PubSubClient.h>
 #include <StreamBuffer.h>
 #include <ringbuffer.h>
-#include <b64.h>
 #include <Servo.h>
 #include <Wire.h>
 #include <Firmata.h>
@@ -46,6 +45,7 @@ char server[] = "mqtt_server";
 #define MQTT_SUBSCRIBE_TOPIC "arduino/input"
 
 //Your 'firmware' type UUID and token for Octoblu //TODO where to get one
+char clientId[] = "arduino";
 char UUID[]  = "username";
 char TOKEN[] = "password";
 
@@ -643,11 +643,10 @@ void onMessage(char* topic, byte* payload, unsigned int length) {
    Serial.print((char)payload[i]);
  }
  Serial.println();
-
- b64::decode((char*)payload, length, externalaccess);
+ 
+ //b64::decode((char*)payload, length, externalaccess);
 
 }
-
 
 void setup()
 {
@@ -721,10 +720,11 @@ void loop()
 
 
       // //wifi has a buffer limit ~90, want around 80, so ~51 before encoding
-      int len = b64::encodeLength(externalaccess.available() > 51 ? 51 : externalaccess.available());
-
+      int len = externalaccess.available() > 51 ? 51 : externalaccess.available();
+      externalaccess.readBytes(outputBuffer, len);
+      Serial.print(outputBuffer);
       // THIS NEEDS TO BE B64ENCODED!
-      b64::encode(externalaccess, outputBuffer, len);
+      //b64::encode(externalaccess, outputBuffer, len);
       mqttClient.publish(MQTT_PUBLISH_TOPIC, outputBuffer);
     }
 
@@ -737,9 +737,8 @@ void loop()
     //oops we're not connected yet or we lost connection
     Serial.println(F("connecting..."));
     
-    char clientId[40] = "mb_";
-    strcat(clientId, UUID);
-
+    //char clientId[40] = "mb_";
+    //strcat(clientId, UUID);
     if (mqttClient.connect(clientId, UUID, TOKEN)){
 
       //success!
